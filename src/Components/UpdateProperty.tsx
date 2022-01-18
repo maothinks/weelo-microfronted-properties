@@ -2,9 +2,11 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Button from '@mui/material/Button';
-import { TextField } from '@mui/material';
+import { Alert, TextField } from '@mui/material';
 import Property from '../Models/Property';
 import PropertyService from '../Services/PropertyService';
+import { Snackbar } from '@material-ui/core';
+import { useState } from 'react';
 
 type Anchor = 'top';
 
@@ -17,23 +19,30 @@ const initialProperty = {
 }
 
 export default function CreateProperty(props) {
+    // USE STATES
+    const [snakMessage, setSnakMessage] = useState({ open: false, message: "" });
     const [property, setProperty] = React.useState(initialProperty);
-    
-    const [state, setState] = React.useState({
-        top: false
-    });
+    const [state, setState] = React.useState({ top: false });
 
+    // USE EFFECTS
     React.useEffect(() => {
-        initialProperty.propertyId= props.currentProperty.propertyId;
-        initialProperty.name= props.currentProperty.name;
-        initialProperty.address= props.currentProperty.address;
-        initialProperty.price= props.currentProperty.price;
-        initialProperty.year= props.currentProperty.year;
+        initialProperty.propertyId = props.currentProperty.propertyId;
+        initialProperty.name = props.currentProperty.name;
+        initialProperty.address = props.currentProperty.address;
+        initialProperty.price = props.currentProperty.price;
+        initialProperty.year = props.currentProperty.year;
         setProperty(initialProperty);
-      }, [props.currentProperty]);
+    }, [props.currentProperty]);
 
     const PropertyOnChange = (prop, value) => {
-        setProperty({...property, [prop]: value});
+        setProperty({ ...property, [prop]: value });
+    };
+
+    // FUNCTIONS AND EVENTS
+
+    // HANDLE CLOSE SNACK BAR MESSAGE
+    const handleClose = () => {
+        setSnakMessage({ ...snakMessage, open: false });
     };
 
     const handleSubmit = (event) => {
@@ -50,6 +59,7 @@ export default function CreateProperty(props) {
 
         new PropertyService().updateProperty(_property, sessionStorage.getItem('token')).then((result: any) => {
             setState({ ...state, top: false });
+            setSnakMessage({ ...snakMessage, open: true, message: result });
             props.handleAfterUpdate();
         });
     };
@@ -149,6 +159,12 @@ export default function CreateProperty(props) {
                     >
                         {list(anchor)}
                     </SwipeableDrawer>
+                    <Snackbar
+                        anchorOrigin={{ "vertical": "top", "horizontal": "right" }}
+                        open={snakMessage.open}
+                        onClose={handleClose}>
+                        <Alert variant="filled" severity="error">{snakMessage.message}</Alert>
+                    </Snackbar>
                 </React.Fragment>
             ))}
         </div>

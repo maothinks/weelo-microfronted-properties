@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Button from '@mui/material/Button';
-import { CircularProgress, Paper, Stack, styled } from '@mui/material';
+import { Alert, CircularProgress, Paper, Snackbar, Stack, styled } from '@mui/material';
 import { v4 as uuidv4 } from 'uuid';
 import FileBase64 from 'react-file-base64';
 import FileStorageService from '../Services/FileStorageService';
@@ -17,21 +17,24 @@ const Input = styled('input')({
 });
 
 export default function UploadImage(props) {
-  const [state, setState] = useState({
-    top: false
-  });
 
+  // uSE STATES
+  const [state, setState] = useState({ top: false });
+  const [snakMessage, setSnakMessage] = useState({ open: false, message: "" });
   const [image, setImage] = useState({ base64: "", url: "" });
   const [disabled, setDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // USE EFFECTS
   useEffect(() => {
     if (image.base64 != "") {
       setDisabled(false);
     }
   }, [image]);
 
-  // Callback
+  // FUNCTIONS AND ENVENTS
+
+  // CALL THE UPLOAD IMAGE SERVICE AND GETS THE IMAGE URL
   const getFiles = (files) => {
     setLoading(true);
 
@@ -43,11 +46,14 @@ export default function UploadImage(props) {
 
     setImage({ ...image, base64: files[0].base64 });
     new FileStorageService().uploadImage(imageDto, sessionStorage.getItem('token')).then((result: any) => {
-      setImage({ ...image, url: result.data });
+      setImage({ ...image, url: result });
       setLoading(false);
-    });
+    }).catch(err => {
+      setSnakMessage({ ...snakMessage, open: true, message: "FIREBASE MICROSERVICE: " + err.toString() });
+    });;
   }
 
+  // EVENT FOR CREATE PROPERTY IMAGE
   const handleSubmit = (event) => {
     let propertyImage = new PropertyImage();
     propertyImage.propertyId = props.propertyId;
@@ -56,12 +62,20 @@ export default function UploadImage(props) {
 
     new PropertyImageService().createImageProperty(propertyImage, sessionStorage.getItem('token')).then((result: any) => {
       setState({ ...state, top: false });
-      setImage({ base64: "", url: ""  })
+      setImage({ base64: "", url: "" })
       setDisabled(true);
       props.handleAfterUpload();
+    }).catch(err => {
+      setSnakMessage({ ...snakMessage, open: true, message: "PROPERTIES MICROSERVICE: " + err.toString() });
     });
   };
 
+  // HANDLE CLOSE SNACK BAR MESSAGE
+  const handleClose = () => {
+    setSnakMessage({ ...snakMessage, open: false });
+  };
+
+  // TOGLE DRAWER
   const toggleDrawer =
     (anchor: Anchor, open: boolean) =>
       (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -81,7 +95,6 @@ export default function UploadImage(props) {
     sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 250 }}
     role="presentation"
   >
-
     <Box
       sx={{
         display: 'flex',
@@ -99,9 +112,9 @@ export default function UploadImage(props) {
             onDone={getFiles} />
         </label>
         <img width={200} height={200} src={image.url} />
-        { loading ? <Box sx={{ display: 'flex' }}>
-            <CircularProgress />
-          </Box> : null }
+        {loading ? <Box sx={{ display: 'flex' }}>
+          <CircularProgress />
+        </Box> : null}
       </Stack>
       <Button
         color="warning"
@@ -129,6 +142,12 @@ export default function UploadImage(props) {
           >
             {list(anchor)}
           </SwipeableDrawer>
+          <Snackbar
+            anchorOrigin={{ "vertical": "top", "horizontal": "right" }}
+            open={snakMessage.open}
+            onClose={handleClose}>
+            <Alert variant="filled" severity="error">{snakMessage.message}</Alert>
+          </Snackbar>
         </React.Fragment>
       ))}
     </div>

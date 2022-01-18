@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import { Avatar } from '@mui/material';
 
 function srcset(image: string, size: number, rows = 1, cols = 1) {
   return {
     src: `${image}?w=${size * cols}&h=${size * rows}&fit=crop&auto=format`,
-    srcSet: `${image}?w=${size * cols}&h=${
-      size * rows
-    }&fit=crop&auto=format&dpr=2 2x`,
+    srcSet: `${image}?w=${size * cols}&h=${size * rows
+      }&fit=crop&auto=format&dpr=2 2x`,
   };
 }
 
@@ -22,13 +22,12 @@ export default function PropertyImageList(props) {
     return <div>No Images Added</div>;
   }
 
-  return (
+  return (<>
     <ImageList
-      // sx={{ width: 500, height: 450 }}
+      sx={{ width: 500, height: 400 }}
       variant="quilted"
       cols={4}
-      rowHeight={121}
-    >
+      rowHeight={121}>
       {images.map((item) => (
         <ImageListItem key={item.propertyImageId} cols={1} rows={1}>
           <img
@@ -36,10 +35,10 @@ export default function PropertyImageList(props) {
             alt={item.propertyImageId}
             loading="lazy"
           />
-          delete
         </ImageListItem>
       ))}
     </ImageList>
+  </>
   );
 }
 

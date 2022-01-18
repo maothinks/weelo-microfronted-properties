@@ -101,11 +101,11 @@ export default function PropertiesPage(props) {
         TotalPages: pm.TotalPages
       }));
 
-      setProperties(result.data);
+      setProperties(result.data.message);
     });
   }
 
-  return (<Box sx={{ flexGrow: 1 }}>
+  return (<Box sx={{ flexGrow: 1 }} >
     <br></br>
     <br></br>
     <Grid container spacing={2}>
@@ -116,11 +116,12 @@ export default function PropertiesPage(props) {
       </Grid>
       <Grid item xs={0.2}>
       </Grid>
-      <Grid item xs={2}>
+      <Grid item xs={3}>
         <div className="p-6 w-1/3">
           <CreateProperty handleAfterCreate={handleAfterCreate}></CreateProperty>
-          <hr></hr>
-          {(properties == undefined || properties.length == 0) ? <div>No Properties Added</div> : ""}
+          
+          {(properties == undefined || properties.length == 0) ? <div><br></br>No Properties Found</div> : ""}
+ 
           <PropertyList properties={properties} />
           <br></br>
           <Stack spacing={2}>
@@ -130,7 +131,7 @@ export default function PropertiesPage(props) {
       </Grid>
       <Grid item xs={0.2}>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={5}>
         <SelectedProperty handleAfterUpdate={handleAfterUpdate} selectedId={selected} />
       </Grid>
     </Grid>

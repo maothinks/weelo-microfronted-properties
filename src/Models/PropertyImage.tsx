@@ -1,4 +1,4 @@
-export default class Property{
+export default class PropertyImage{
     propertyImageId: string;
     propertyId: string;
     filePath: string;

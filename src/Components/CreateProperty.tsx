@@ -2,16 +2,25 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import Button from '@mui/material/Button';
-import { TextField } from '@mui/material';
+import { Alert, Snackbar, TextField } from '@mui/material';
 import Property from '../Models/Property';
 import PropertyService from '../Services/PropertyService';
+import { useState } from 'react';
 
 type Anchor = 'top';
 
 export default function CreateProperty(props) {
-  const [state, setState] = React.useState({
-    top: false
-  });
+  
+  // USE STATES
+  const [snakMessage, setSnakMessage] = useState({ open: false, message: "" });
+  const [state, setState] = React.useState({ top: false });
+
+  // FUNCTIONS AND EVENTS
+
+  // HANDLE CLOSE SNACK BAR MESSAGE
+  const handleClose = () => {
+    setSnakMessage({ ...snakMessage, open: false });
+  };
 
   const handleSubmit = (event) => {
     var user = JSON.parse(sessionStorage.getItem('user'));
@@ -28,6 +37,7 @@ export default function CreateProperty(props) {
     property.ownerId = user.id;
 
     new PropertyService().createProperty(property, sessionStorage.getItem('token')).then((result: any) => {
+      setSnakMessage({ ...snakMessage, open: true, message: result });
       setState({ ...state, top: false });
       props.handleAfterCreate();      
     });
@@ -119,6 +129,12 @@ export default function CreateProperty(props) {
             onOpen={toggleDrawer(anchor, true)}>
             {list(anchor)}
           </SwipeableDrawer>
+          <Snackbar
+            anchorOrigin={{ "vertical": "top", "horizontal": "right" }}
+            open={snakMessage.open}
+            onClose={handleClose}>
+            <Alert variant="filled" severity="error">{snakMessage.message}</Alert>
+          </Snackbar>
         </React.Fragment>
       ))}
     </div>

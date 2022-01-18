@@ -3,14 +3,13 @@ import PaginationParams from "../Models/PaginationParams";
 import axios from 'axios';
 import Property from "../Models/Property";
 import FilterParams from "../Models/FilterParams";
+import appSettings from "../appSettings.json"
 
 export default class PropertyService {
-    apiServer: string = "https://localhost:44399/Gateway/properties";
 
+    // Get properrties pagination and filtering based
     public getProperties(paginationParams:PaginationParams,filterParams:FilterParams, token:string): Promise<Property[]> {
-        debugger;
         return new Promise((resolve, reject) => {
-            debugger;
             var pagination = "?page=" + paginationParams.Page + "&itemsperpage=" + paginationParams.ItemsPerPage;
             var filtering = "&name=" + filterParams.name;
             filtering = filtering + "&maxPrice=" + filterParams.maxPrice;
@@ -26,8 +25,12 @@ export default class PropertyService {
                 }
             }
 
-            axios.get(this.apiServer + pagination + filtering, config)
+            axios.get(appSettings.ServerGateway + "properties" + pagination + filtering, config)
                 .then((res:any) => {
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
                     resolve(res);
                 }). 
                 catch(err => {
@@ -36,6 +39,7 @@ export default class PropertyService {
         });
     }
 
+    // Creates a new property
     public createProperty(property:Property, token:string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             let config = {
@@ -44,7 +48,7 @@ export default class PropertyService {
                 }
             }
 
-            axios.post(this.apiServer, {
+            axios.post(appSettings.ServerGateway + "properties", {
                 "name": property.name,
                 "address": property.address,
                 "price": property.price,
@@ -53,7 +57,11 @@ export default class PropertyService {
                 "ownerId": property.ownerId
            }, config)
                 .then((res:any) => {
-                    resolve(true);
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
+                    resolve(res.data.message);
                 }).
                 catch(err => {
                     reject(err);
@@ -61,6 +69,7 @@ export default class PropertyService {
         });
     }
 
+    // Updates an specific properties
     public updateProperty(property:Property, token:string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             let config = {
@@ -69,7 +78,7 @@ export default class PropertyService {
                 }
             }
 
-            axios.put(this.apiServer + "/" + property.propertyId, {
+            axios.put(appSettings.ServerGateway + "properties/" + property.propertyId, {
                 "name": property.name,
                 "address": property.address,
                 "price": property.price,
@@ -78,7 +87,11 @@ export default class PropertyService {
                 "ownerId": property.ownerId
            }, config)
                 .then((res:any) => {
-                    resolve(true);
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
+                    resolve(res.data.message);
                 }).
                 catch(err => {
                     reject(err);
@@ -86,6 +99,7 @@ export default class PropertyService {
         });
     }
 
+    // Get a property by Id
     public getPropertyById(id:string, token:string): Promise<Property> {
         return new Promise((resolve, reject) => {
             
@@ -95,9 +109,13 @@ export default class PropertyService {
                 }
             }
 
-            axios.get(this.apiServer + "/" + id,  config)
+            axios.get(appSettings.ServerGateway + "properties/" + id,  config)
                 .then((res:any) => {
-                    resolve(res);
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
+                    resolve(res.data.message);
                 }). 
                 catch(err => {
                     reject(err);

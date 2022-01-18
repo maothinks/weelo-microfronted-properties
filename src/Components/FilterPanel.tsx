@@ -1,14 +1,15 @@
 import { Box, Button, Slider, TextField, Typography } from "@mui/material";
+import { color } from "@mui/system";
 import React, { useState, useEffect } from "react";
 
-const filtersDto = { name: "", maxPrice: 1000000, maxViews: 1000, maxYear: 2022, minPrice: 0, minViews: 0, minYear: 1492, }
+const filtersDto = { name: "", maxPrice: 1000000, maxViews: 1000, maxYear: 2022, minPrice: 0, minViews: 0, minYear: 0, }
 
 export default function Filterpanel(props) {
     const [filters, setFilters] = useState(filtersDto);
     const [name, setName] = useState<string>("");
     const [price, setPrice] = useState<number[]>([0, 1000000]);
     const [views, setViews] = useState<number[]>([0, 1000]);
-    const [year, setYear] = useState<number[]>([1492, 2022]);
+    const [year, setYear] = useState<number[]>([0, 2022]);
 
     // USE EFFECTS
     useEffect(() => {
@@ -43,26 +44,17 @@ export default function Filterpanel(props) {
         props.handleFilterSearch(filtersDto);
     };
 
-    return (<>
-        <Button variant="contained" onClick={handleFilterSearchClick} color="warning"> Search Filter</Button>
-        <hr></hr>
-        <br></br>
-        <Box
-            sx={{
-                width: 500,
-                maxWidth: '100%',
-            }}
-        >
+    return (<Box style={{ margin:"10px"}}>
+        <Box>
             <TextField
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 fullWidth
-                label="Name"
+                label="Search by Name"
                 id="Name" />
         </Box>
         <br></br>
-        <hr></hr>
-        <Box>
+        <Box style={{ margin:"20px"}}>
             <Typography gutterBottom>Price</Typography>
             <Slider
                 max={1000000}
@@ -70,31 +62,22 @@ export default function Filterpanel(props) {
                 value={price}
                 onChange={handlePriceChange}
                 valueLabelDisplay="auto"
-
             />
         </Box>
-        <br></br>
-        <Box>
-            <Typography gutterBottom>Views</Typography>
-            <Slider
-                max={1000}
-                min={0}
-                value={views}
-                onChange={handleViewsChange}
-                valueLabelDisplay="auto"
-            />
-        </Box>
-        <br></br>
-        <Box>
+        <Box style={{ margin:"20px"}}>
             <Typography gutterBottom>Year</Typography>
             <Slider
                 max={2022}
-                min={1492}
+                min={0}
                 value={year}
                 onChange={handleYearChange}
                 valueLabelDisplay="auto"
             />
         </Box>
-    </>
+
+        <br></br>
+        <br></br>
+        <Button style={{width:"100%"}} variant="contained" onClick={handleFilterSearchClick} color="primary"> Search Filter</Button>
+    </Box>
     );
 }

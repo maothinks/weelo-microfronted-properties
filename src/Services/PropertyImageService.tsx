@@ -1,10 +1,11 @@
 
 import axios from 'axios';
 import PropertyImage from "../Models/PropertyImage";
+import appSettings from "../appSettings.json"
 
 export default class PropertyImageService {
-    apiServer: string = "https://localhost:44399/Gateway/propertyImages";
 
+    // Create a new Image Property
     public createImageProperty(propertyImage:PropertyImage, token:string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             let config = {
@@ -13,13 +14,17 @@ export default class PropertyImageService {
                 }
             }
 
-            axios.post(this.apiServer, {
+            axios.post(appSettings.ServerGateway + "propertyImages", {
                 "propertyId": propertyImage.propertyId,
                 "filePath": propertyImage.filePath,
                 "enabled": propertyImage.enabled,
            }, config)
                 .then((res:any) => {
-                    resolve(true);
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
+                    resolve(res.data.message);
                 }).
                 catch(err => {
                     reject(err);
@@ -27,6 +32,7 @@ export default class PropertyImageService {
         });
     }
 
+    // get images properties by propertyId
     public getAllByPropertyId(propertyId:string, token:string): Promise<PropertyImage[]> {
         return new Promise((resolve, reject) => {
             let config = {
@@ -35,9 +41,13 @@ export default class PropertyImageService {
                 }
             }
 
-            axios.get(this.apiServer + "/GetAllByPropertyId/" + propertyId, config)
+            axios.get(appSettings.ServerGateway + "propertyImages/GetAllByPropertyId/" + propertyId, config)
                 .then((res:any) => {
-                    resolve(res);
+                    if (!res.data.success) { 
+                        reject(res.data.message);
+                    }
+
+                    resolve(res.data.message);
                 }). 
                 catch(err => {
                     reject(err);

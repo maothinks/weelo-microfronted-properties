@@ -1,6 +1,8 @@
-import { Alert, Box, CircularProgress, Grid, Snackbar } from "@mui/material";
+import { Alert, Avatar, Box, CircularProgress, Grid, Snackbar } from "@mui/material";
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import PropertyImageUseCase from "../Application/PropertyImageUseCase";
+import PropertyView from "../Models/PropertyView";
+import NotificationService from "../Services/NotificationService";
 import PropertyService from "../Services/PropertyService";
 import PropertyAttribute from "./PropertyAttribute";
 import PropertyImageList from "./PropertyImageList";
@@ -17,24 +19,37 @@ export default function SelectedProperty(props) {
   // USE STATES
   const [loading, setLoading] = useState(false);
   const [propertyImages, setPropertyImages] = useState([]);
-  const [snakMessage, setSnakMessage] = useState({open: false, message: ""});
+  const [snakMessage, setSnakMessage] = useState({ open: false, message: "" });
   const [currentProperty, setcurrentProperty] = useState({
-    propertyId: '', name: '', address: '', price: 0, codeInternal: '', year: 0, ownerId: 0, views:0 });
+    propertyId: '', name: '', address: '', price: 0, codeInternal: '', coverPath: "", year: 0, ownerId: 0, views: 0
+  });
 
-    
+
   // USE EFFECTS
   useEffect(() => {
-    fetchImages();
+    if (selectedId && selectedId != "properties") {
+      fetchImages();
+    }
   }, []);
 
   useEffect(() => {
-    fetchImages();
+    if (selectedId && selectedId != "properties") {
+      fetchImages();
 
-    if (selectedId) {
-      getProperty();
+      new PropertyService().getPropertyById(selectedId, sessionStorage.getItem('token')).then((property: any) => {
+        if (property) {
+          setcurrentProperty(property);
+          let user = JSON.parse(sessionStorage.getItem('user'));
+
+          if (user.id != property.ownerId) {
+            updateView(property.ownerId);
+            props.handleAfterUpdate();
+          }
+        }
+      });
     }
   }, [selectedId]);
-  
+
   // EVENTS
   // HANDLE CLOSE SNACK
   const handleClose = () => {
@@ -45,7 +60,7 @@ export default function SelectedProperty(props) {
   const fetchImages = () => {
     setLoading(true);
     new PropertyImageUseCase().getAllByPropertyId(selectedId, sessionStorage.getItem('token')).then((results: any) => {
-      setPropertyImages(results.data);
+      setPropertyImages(results);
       setLoading(false);
     });
   }
@@ -60,29 +75,38 @@ export default function SelectedProperty(props) {
   // HANDLE FUNCTION AFTER CREATE PROPERTY
   const handleAfterUpload = () => {
     fetchImages();
+    getProperty();
     setSnakMessage({ open: true, message: "Image Uploaded successfully" });
     props.handleAfterUpdate();
   }
 
   // GET PROPERTY DATA
-  const getProperty = () =>
-  {
+  const getProperty = () => {
     new PropertyService().getPropertyById(selectedId, sessionStorage.getItem('token')).then((property: any) => {
-      debugger;
-      setcurrentProperty(property.data);
+      setcurrentProperty(property);
     });
   }
+
+  const updateView = (userId: number) => {
+    let propertyView = new PropertyView();
+    propertyView.PropertyId = selectedId;
+    propertyView.UserId = userId;
+    new NotificationService().NotifyPropertyView(propertyView, sessionStorage.getItem('token')).catch(err => {
+      setSnakMessage({ ...snakMessage, open: true, message: "NOTIFICATIONS MICROSERVICE: " + err.toString() });
+    });;
+  };
 
   if (currentProperty.propertyId == undefined || currentProperty.propertyId == "") {
     return <div>No Property Selected</div>;
   }
-  
+
   return (<>
     <Grid container spacing={2}>
       <Grid item xs={1}></Grid>
       <Grid item xs={5}>
-        <UpdateProperty handleAfterUpdate={handleAfterUpdate} currentProperty={currentProperty}></UpdateProperty>
-        <hr></hr>
+
+        {currentProperty.ownerId == (JSON.parse(sessionStorage.getItem('user'))).id ? <UpdateProperty handleAfterUpdate={handleAfterUpdate} currentProperty={currentProperty}></UpdateProperty> : ""}
+        <br></br>
 
         <PropertyAttribute title={"Name"} value={currentProperty.name} />
         <br></br>
@@ -91,14 +115,20 @@ export default function SelectedProperty(props) {
         <PropertyAttribute title={"Price"} value={currentProperty.price} />
         <br></br>
         <PropertyAttribute title={"Year"} value={currentProperty.year} />
-        <br></br>
-        <PropertyAttribute title={"Views"} value={currentProperty.views.toString()} />
       </Grid>
       <Grid item xs={6}>
-        <UploadImage handleAfterUpload={handleAfterUpload} propertyId={selectedId}></UploadImage>
-        <hr></hr>
-        { loading ? <Box sx={{ display: 'flex' }}><CircularProgress /></Box> : null }
-        <PropertyImageList propertyImages={propertyImages} propertyId={selectedId}></PropertyImageList>
+        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          {currentProperty.ownerId == (JSON.parse(sessionStorage.getItem('user'))).id ? <UploadImage handleAfterUpload={handleAfterUpload} propertyId={selectedId}></UploadImage> : ""}
+        </div>
+        <br></br>
+        <Avatar
+          src={currentProperty.coverPath}
+          sx={{ width: 300, height: 300 }}
+        />
+        
+        <br></br>
+        {loading ? <Box sx={{ display: 'flex' }}><CircularProgress /></Box> : null}
+        <PropertyImageList propertyImages={propertyImages} propertyId={selectedId} cover={currentProperty.coverPath}></PropertyImageList>
       </Grid>
     </Grid>
     <Snackbar

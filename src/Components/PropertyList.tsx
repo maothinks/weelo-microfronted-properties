@@ -5,6 +5,8 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { CardActions } from "@mui/material";
+import { ExpandMore } from "@material-ui/icons";
 
 export default function PropertyList(props) {
 
@@ -19,31 +21,29 @@ export default function PropertyList(props) {
             borderClass = "";
           }
 
-          return (<div>
+          return (<div key={index}>
             <br></br>
             <Card sx={{ maxWidth: 345 }}>
               <CardMedia
                 component="img"
-                height="80"
-                image= {property.coverPath?property.coverPath:"https://spareslab.com/images/no-image.svg"}
+                height="180"
+                image={property.coverPath ? property.coverPath : "https://spareslab.com/images/no-image.svg"}
                 alt={property.propertyId}
               />
               <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
+                <Typography gutterBottom variant="h6" component="div">
                   {property.name}
                 </Typography>
-                <Typography gutterBottom  component="div">
-                  Views: {property.views}
-                </Typography>
-                <Typography component="div">
-                  <hr></hr>
-                <Button size="small">
-                  <Link key={property.name} to={`/properties/${window.encodeURIComponent(property.propertyId)}`}>
-                    See Details
-                  </Link>
-                </Button>
+                <Typography gutterBottom variant="h6" component="div">
+                  <div><label style={{fontWeight:"bold", fontSize:"medium"}}>Views:</label><label style={{fontSize:"medium"}}>{property.views}</label></div>
                 </Typography>
               </CardContent>
+              <CardActions style={{ display: "flex", justifyContent: "flex-end"}}>
+                <Button size="small">
+                  <Link style={{ textDecoration: 'none' }} key={property.name} to={`/properties/${window.encodeURIComponent(property.propertyId)}`}>
+                    <Button variant="contained" color="warning"> See Details</Button>
+                  </Link></Button>
+              </CardActions>
             </Card>
           </div>
           );
@@ -52,14 +52,3 @@ export default function PropertyList(props) {
     </div>
   );
 }
-
-// <Link
-//   key={property.name}
-//   className={`h-12 flex items-center ${borderClass} border-white cursor-pointer no-underline`}
-//   to={`/properties/${window.encodeURIComponent(property.propertyId)}`}
-// >
-//   {property.name}
-// </Link>
-
-
-

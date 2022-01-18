@@ -1,11 +1,13 @@
-import Image from "../Models/Image";
+
 import axios from 'axios';
+import PropertyImage from "../Models/PropertyImage";
 import appSettings from "../appSettings.json"
+import PropertyView from '../Models/PropertyView';
 
-export default class FileStorageService {
+export default class NotificationService  {
 
-    // Calls the firestorage service to upload the image and returns and image url
-    public uploadImage(image:Image, token:string): Promise<string> {
+    // Notify a new view on a specific property
+    public NotifyPropertyView(propertyView:PropertyView, token:string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             let config = {
                 headers: {
@@ -13,14 +15,17 @@ export default class FileStorageService {
                 }
             }
 
-            axios.post(appSettings.ServerGateway + "Images/UploadImage", { image: image.image, imageName:image.imageName, id: image.id } , config)
+            axios.post("https://localhost:44305/api/NotifyViews", {
+                "PropertyId": propertyView.PropertyId,
+                "UserId": propertyView.UserId,
+           }, config)
                 .then((res:any) => {
                     if (!res.data.success) { 
                         reject(res.data.message);
                     }
 
                     resolve(res.data.message);
-                }). 
+                }).
                 catch(err => {
                     reject(err);
                 });
