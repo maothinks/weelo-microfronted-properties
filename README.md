@@ -11,6 +11,16 @@ This microfrontend shows the main page with properties, here the user can intera
 
 ## Installation
 
+- appsettings.json
+
+This file contais the parameters for Api Gateway
+
+```javascript
+{
+    "ServerGateway": "https://localhost:44399/Gateway/"
+}
+```
+
 Install the dependencies and start the server (use port 8502 for tests).
 
 ```sh
